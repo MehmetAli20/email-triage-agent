@@ -1,0 +1,17 @@
+{
+  "coding_agent": {
+    "available": true,
+    "requires_human_on_result": true,
+    "handles": ["bug_report", "technical_question"]
+  },
+  "calendar_agent": {
+    "available": false,
+    "requires_human_on_result": true,
+    "handles": ["scheduling"]
+  },
+  "finance_agent": {
+    "available": false,
+    "requires_human_on_result": true,
+    "handles": ["invoice", "expense"]
+  }
+}
