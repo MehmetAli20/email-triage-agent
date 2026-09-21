@@ -5,7 +5,7 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 
-# Ham korpus ve kosu kayitlari repoya girmez - ama klasor yapisi klonda dursun
+# Raw corpus and run records stay out of the repo - but keep the folders
 data/corpus/*
 !data/corpus/.gitkeep
 runs/*

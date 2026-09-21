@@ -1,9 +1,7 @@
-"""Iki baseline.
+"""Two baselines.
 
-1. "her seyi HUMAN'a gonder"  -> bugunku durum, referans noktasi
-2. anahtar kelime regex'i     -> LLM'in gecmesi gereken cita
-
-CP2'de doldurulacak.
+1. "send everything to HUMAN" - the status quo, and the reference point
+2. a keyword regex       - the bar the LLM has to clear
 """
 from __future__ import annotations
 

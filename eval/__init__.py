@@ -1,1 +1,1 @@
-"""Offline degerlendirme. Model CAGIRMAZ - kayitlardan okur."""
+"""Offline evaluation. Never calls the model - it reads stored records."""

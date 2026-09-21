@@ -1,24 +1,26 @@
-# Karar Gunlugu
+# Decision Log
 
-Her adimda uc satir: **ne yapildi - hangi sayi cikti - hangi karar verildi**.
-Bu dosya, konusma bittiginde projenin hafizasi.
+Three lines per step: **what was done - what number came out - what was decided**.
+This file is the project's memory once a working session ends.
 
 ---
 
-## 2026-09-17 - CP1 basladi
+## 2026-09-17 - contract frozen, skeleton up
 
-**Ne yapildi:** Iskelet olusturuldu. Olcum sozlesmesi `EVALUATION.md` olarak
-donduruldu. Sema (`schemas.py`) yazildi.
+**Done:** Skeleton created. Measurement contract frozen as `EVALUATION.md`.
+Schema written. 8 tests passing, 2 skipped, ruff clean.
 
-**Karar - otonomi etiketlenemez.** Ilk tasarimda altin kumeye `autonomy_mode`
-konuyordu. O etiket var olamaz: "bu mail otonom islenebilirdi" mailin ozelligi
-degil, modelin dogru cevap uretip uretmediginin sonucu. Yerine `HUMAN /
-not-HUMAN` ikili etiketi kondu - bu mailin ozelligi ve etiketlenebilir.
+**Decision - autonomy cannot be labelled.** The first design put an
+`autonomy_mode` label in the gold set. That label cannot exist: "could this
+have been handled without me" is not a property of the email, it is a
+consequence of whether the model got it right. Replaced with the binary
+`HUMAN / not-HUMAN`, which *is* a property of the email and can be annotated
+directly.
 
-**Karar - etiket agent varliğindan bagimsiz.** Registry degisince gold
-degismemeli, yoksa altin kume kararsiz hale gelir.
+**Decision - the label ignores agent availability.** If gold changed when the
+registry changed, the gold set would be unstable.
 
-**Karar - R = 0.95, dokunulmaz dilim 60 mail, bilgi amacli mailler
-"bilmek istiyorsam YES".**
+**Decision - R = 0.95, held-out slice 60 emails, informational email is
+`YES` when I would want to know.**
 
-**Sirada:** CP2 - korpus temizligi ve ilk 30 etiket.
+**Next:** corpus cleaning and the first 30 labels.

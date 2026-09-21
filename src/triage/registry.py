@@ -1,6 +1,5 @@
-"""Agent registry - downstream agent YAZILMIYOR, arayuz ve karar yaziliyor.
-
-CP5'te doldurulacak.
+"""Agent registry. No downstream agent is implemented - only the interface
+and the routing decision that depends on it.
 """
 from __future__ import annotations
 

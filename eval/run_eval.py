@@ -1,14 +1,12 @@
-"""Tek komut: kayitlari + gold'u oku, metrikleri bas.
+"""One command: read the records and the gold set, print the metrics.
 
-MODEL CAGIRMAZ. Esigi yuz kez supursen maliyeti sifir.
-
-CP1-CP4 boyunca buyuyecek.
+Never calls the model. Sweeping the threshold a hundred times costs nothing.
 """
 from __future__ import annotations
 
 
 def main() -> int:
-    raise NotImplementedError("CP1")
+    raise NotImplementedError
 
 
 if __name__ == "__main__":

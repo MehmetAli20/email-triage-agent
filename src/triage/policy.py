@@ -1,8 +1,7 @@
-"""Sert politika kapisi. SAF - modelin karari buraya karismaz.
+"""Hard policy gate. PURE - the model's opinion does not reach in here.
 
-Buraya `import anthropic` girerse mimari sinir kaymis demektir.
-
-CP3'te doldurulacak.
+If `import anthropic` ever appears in this file, the architecture boundary
+has slipped.
 """
 from __future__ import annotations
 
@@ -10,8 +9,8 @@ from .schemas import AnalyzerOutput, EmailInput, PolicyResult
 
 
 def evaluate(email: EmailInput, analyzer: AnalyzerOutput) -> PolicyResult:
-    """Finansal / hukuki / guvenlik / dis aksiyon -> HUMAN, esikten bagimsiz.
+    """Financial / legal / security / external-action -> HUMAN, regardless of score.
 
-    Bloklanan vakalar esik egrisine GIRMEZ (EVALUATION.md, bolum 4).
+    Blocked cases are excluded from the threshold curve (EVALUATION.md, section 4).
     """
-    raise NotImplementedError("CP3")
+    raise NotImplementedError

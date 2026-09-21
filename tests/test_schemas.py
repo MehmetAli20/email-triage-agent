@@ -1,4 +1,4 @@
-"""Sema testleri - API anahtari gerektirmez, milisaniyede biter."""
+"""Schema tests - no API key, milliseconds to run."""
 from __future__ import annotations
 
 from datetime import datetime
@@ -32,7 +32,7 @@ def _email(**kw) -> EmailInput:
 def test_email_input_is_frozen():
     e = _email()
     with pytest.raises(ValidationError):
-        e.subject = "degisti"
+        e.subject = "changed"
 
 
 def test_thread_context_capped_at_three():
@@ -52,7 +52,7 @@ def test_human_score_must_be_a_probability():
 
 
 def test_send_is_not_a_valid_decision():
-    """v1'de agent'a gonderme yetkisi verilmiyor."""
+    """v1 gives the agent no authority to send."""
     assert not hasattr(Decision, "SEND")
     assert set(Decision) == {
         Decision.DISCARD,
@@ -67,12 +67,12 @@ def test_send_is_not_a_valid_decision():
     [(HumanRequired.YES, True), (HumanRequired.UNCERTAIN, True), (HumanRequired.NO, False)],
 )
 def test_uncertain_counts_as_human(value, expected):
-    """EVALUATION.md, baglayici kural 2."""
+    """EVALUATION.md, binding rule 2."""
     g = GoldLabel(message_id="m1", gold_version="v1", human_required=value)
     assert g.is_human is expected
 
 
 def test_gold_label_has_no_autonomy_field():
-    """Otonomi etiketlenemez - modelin dogrulugundan turetilir."""
+    """Autonomy cannot be labelled - it is derived from correctness."""
     assert "autonomy_mode" not in GoldLabel.model_fields
     assert "human_required" in GoldLabel.model_fields

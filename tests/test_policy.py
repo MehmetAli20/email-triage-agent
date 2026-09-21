@@ -1,15 +1,15 @@
-"""Politika testleri - CP3'te doldurulacak.
+"""Policy tests.
 
-Buraya `import anthropic` GIRMEZ. Girerse mimari sinir kaymistir.
+`import anthropic` must never appear here. If it does, the boundary has slipped.
 """
 import pytest
 
 
-@pytest.mark.skip(reason="CP3")
+@pytest.mark.skip(reason="policy not implemented yet")
 def test_financial_always_blocks():
     ...
 
 
-@pytest.mark.skip(reason="CP3")
+@pytest.mark.skip(reason="policy not implemented yet")
 def test_external_recipient_always_blocks():
     ...

@@ -1,9 +1,7 @@
-"""Karar yonlendirici. SAF fonksiyon.
+"""Decision router. A PURE function.
 
-tau ve kalibre skor disaridan gelir - bu modul hicbir sey ogrenmez ve
-hicbir yan etki uretmez. Sayesinde esik supurme bedava.
-
-CP3'te doldurulacak.
+The threshold and the calibrated score are passed in - this module learns
+nothing and has no side effects, which is why sweeping the threshold is free.
 """
 from __future__ import annotations
 
@@ -17,8 +15,8 @@ def route(
     threshold: float,
     registry: dict,
 ) -> RoutingDecision:
-    """Sira onemli: once sert politika, sonra guven esigi, sonra registry.
+    """Order matters: hard policy first, then the confidence gate, then the registry.
 
-    Registry'de agent yoksa -> HUMAN, blocked_by="target_agent_unavailable".
+    If the target agent is unavailable -> HUMAN, blocked_by="target_agent_unavailable".
     """
-    raise NotImplementedError("CP3")
+    raise NotImplementedError

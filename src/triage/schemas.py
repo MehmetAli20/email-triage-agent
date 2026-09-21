@@ -1,13 +1,14 @@
-"""Sistemin sozlesmesi. EVALUATION.md ile birlikte okunur.
+"""The system's contract. Read alongside EVALUATION.md.
 
-Iki baglayici kural buraya gomulidur:
-  1. GoldLabel agent varliğindan bagimsizdir - registry gercegi degistirmez.
-  2. RunRecord ham yaniti OLDUGU GIBI tasir; turetilmis her sey yeniden
-     hesaplanabilir olmali.
+Two binding rules are baked in here:
+  1. GoldLabel is independent of agent availability - the registry never
+     changes the truth.
+  2. RunRecord carries the raw response verbatim, so anything derived from it
+     can be recomputed without calling the model again.
 
-Modul kohezyona gore bolunur, tipe gore degil. ~500 satiri asarsa
-schemas/ paketine donusur ve __init__ hepsini yeniden disa acar; boylece
-`from triage.schemas import X` hic degismez.
+Modules are split by cohesion, not by type. If this file passes ~500 lines it
+becomes a schemas/ package whose __init__ re-exports everything, so
+`from triage.schemas import X` keeps working either way.
 """
 from __future__ import annotations
 
@@ -18,7 +19,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class Category(StrEnum):
-    """Konuya gore degil, NIYETE gore. Konu kategorileri aksiyonu belirlemiyor."""
+    """By intent, not by topic. Topic categories don't determine the action."""
 
     REQUEST_ACTION = "REQUEST_ACTION"
     REQUEST_INFO = "REQUEST_INFO"
@@ -40,7 +41,7 @@ class RiskDomain(StrEnum):
 
 
 class Decision(StrEnum):
-    """SEND yok - v1'de agent'a gonderme yetkisi verilmiyor."""
+    """No SEND - v1 gives the agent no authority to send anything."""
 
     DISCARD = "DISCARD"
     DELEGATE = "DELEGATE"
@@ -51,7 +52,7 @@ class Decision(StrEnum):
 class HumanRequired(StrEnum):
     YES = "YES"
     NO = "NO"
-    UNCERTAIN = "UNCERTAIN"  # birincil metrikte YES sayilir, rapor iki turlu
+    UNCERTAIN = "UNCERTAIN"  # counts as YES in the primary metric; reported both ways
 
 
 class Importance(StrEnum):
@@ -68,9 +69,9 @@ class EmailInput(BaseModel):
     to_addrs: list[str] = Field(default_factory=list)
     cc_addrs: list[str] = Field(default_factory=list)
     subject: str
-    body_text: str  # temizlenmis: imza, alinti zinciri, dipnot cikarilmis
+    body_text: str  # cleaned: signature, quoted chain and footer stripped
     received_at: datetime
-    is_external: bool  # hesaplanir - sert politika tetikleyicisi
+    is_external: bool  # computed - one of the hard-policy triggers
     thread_position: int = 1
     prior_messages: list[str] = Field(default_factory=list, max_length=3)
     has_attachments: bool = False
@@ -85,7 +86,8 @@ class ExtractedFields(BaseModel):
 
 
 class AnalyzerOutput(BaseModel):
-    """LLM'in urettigi. human_score_raw KALIBRE DEGIL - modelin beyani."""
+    """What the LLM produces. human_score_raw is NOT calibrated - it is what
+    the model asserts about itself."""
 
     summary: str
     primary: Category
@@ -99,30 +101,31 @@ class AnalyzerOutput(BaseModel):
 
 
 class PolicyResult(BaseModel):
-    """Sert kurallarin ciktisi. Modelin karari degil."""
+    """Output of the hard rules. Not the model's decision."""
 
     blocked: bool
     triggers: list[RiskDomain] = Field(default_factory=list)
 
 
 class RoutingDecision(BaseModel):
-    """Saf fonksiyonun ciktisi: (AnalyzerOutput, PolicyResult, tau) -> bu.
+    """Output of a pure function: (AnalyzerOutput, PolicyResult, tau) -> this.
 
-    SAKLANMAZ. Her zaman yeniden hesaplanir, boylece esigi supurmek bedava.
+    NEVER PERSISTED. Recomputed every time, which is what makes sweeping the
+    threshold free.
     """
 
     decision: Decision
-    human_score: float  # kalibre edilmis
+    human_score: float  # calibrated
     threshold: float
     blocked_by: str | None = None
     reason: str
 
 
 class RunRecord(BaseModel):
-    """Degismez ve saklanan TEK sey.
+    """The only thing that is immutable and stored.
 
-    Eksik yazmanin geri donusu yok: kod her zaman refactor edilebilir,
-    kaydedilmeyen veri geri gelmez.
+    Getting this wrong is the one unrecoverable mistake: code can always be
+    refactored, data that was never recorded is gone.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -131,7 +134,7 @@ class RunRecord(BaseModel):
     message_id: str
     created_at: datetime
 
-    raw_response: str  # yanitin TAMAMI, ayristirilmadan
+    raw_response: str  # the response in full, unparsed
     analyzer: AnalyzerOutput
     policy: PolicyResult
 
@@ -147,9 +150,10 @@ class RunRecord(BaseModel):
 
 
 class GoldLabel(BaseModel):
-    """Katman 1 hepsinde, Katman 2 alt kumede.
+    """Tier 1 on every case, tier 2 on a subset.
 
-    DIKKAT: agent varliğindan BAGIMSIZ. Registry degisince bu degismez.
+    NOTE: independent of agent availability. Changing the registry does not
+    change this.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -158,10 +162,10 @@ class GoldLabel(BaseModel):
     gold_version: str
     human_required: HumanRequired
     importance: Importance = Importance.NORMAL
-    tier2_decision: Decision | None = None  # sadece not-HUMAN alt kumesinde
+    tier2_decision: Decision | None = None  # only on the not-HUMAN subset
     note: str | None = None
 
     @property
     def is_human(self) -> bool:
-        """UNCERTAIN birincil metrikte YES sayilir (EVALUATION.md, kural 2)."""
+        """UNCERTAIN counts as YES in the primary metric (EVALUATION.md, rule 2)."""
         return self.human_required in (HumanRequired.YES, HumanRequired.UNCERTAIN)

@@ -1,51 +1,51 @@
 # Email Triage Agent
 
-Kurumsal gelen kutusu icin risk-farkindali yonlendirme agent'i. Asil isi cevap
-yazmak degil, **bu mailin kontrolunu kimin almasi gerektigine karar vermek**.
+A risk-aware routing agent for a corporate inbox. Its job is not to write
+replies - it is to decide **who should take control of this email**.
 
 ```
-DISCARD    kullaniciya gosterme (arsivle, SILME)
-DELEGATE   baska bir agent'a yonlendir (registry'den kontrol)
-DRAFT      taslak uret, GONDERME
-HUMAN      mutlaka kullaniciya getir
+DISCARD    don't surface it to the user (archive, never delete)
+DELEGATE   hand off to another agent (checked against the registry)
+DRAFT      prepare a reply, don't send it
+HUMAN      must reach the user
 ```
 
-`SEND` karari yok. v1'de agent'a gonderme yetkisi verilmiyor.
+There is no `SEND` decision. v1 gives the agent no authority to send anything.
 
-## Arastirma sorusu
+## Research question
 
-> Bir LLM yonlendirme agent'i, **kacirilan insan-gerekli mail oranini
-> belirtilen bir tavanin altinda tutarken**, insan e-posta yukunu ne kadar
-> azaltabilir?
+> How much human email workload can an LLM routing agent remove, while
+> keeping the rate of missed human-required email below a stated ceiling?
 
-Kisit once, optimizasyon sonra. Olcum sozlesmesi: [EVALUATION.md](EVALUATION.md)
+Constraint first, optimisation second. The measurement contract is in
+[EVALUATION.md](EVALUATION.md) and is frozen.
 
-## Uc katman
+## Three layers
 
-| Katman | Soru | Rolu |
+| Layer | Question | Role |
 |---|---|---|
-| **HUMAN?** | Bu mail bana gelmeli mi? | Projenin bilimsel katkisi |
-| **WHO?** | Gelmeyecekse kim ilgilenecek? | Mimari katki |
-| **HOW?** | Ne yapilacak? | Genisletilebilirlik |
+| **HUMAN?** | Should this reach me? | The measurable contribution |
+| **WHO?** | If not, who handles it? | The architecture |
+| **HOW?** | What gets done? | Extensibility |
 
-## Mimari siniri
+## Architecture boundary
 
-`analyzer.py` tek non-deterministik modul. `policy.py`, `router.py` ve
-`eval/metrics.py` saf ve deterministik - icinde `import anthropic` gorursen
-sinir kaymis demektir.
+`analyzer.py` is the only non-deterministic module. `policy.py`, `router.py`
+and `eval/metrics.py` stay pure - if you find `import anthropic` in any of
+them, the boundary has slipped.
 
-`RoutingDecision` **saklanmaz**, her seferinde yeniden hesaplanir. Esigi
-supurmek bu yuzden bedava.
+`RoutingDecision` is **never persisted**; it is recomputed on every read.
+That is what makes sweeping the threshold free. `RunRecord` is frozen and
+carries the full raw response alongside the model id, prompt hash and git sha.
 
-## Kurulum
+## Setup
 
 ```bash
-uv sync --extra dev
-cp .env.example .env
-uv run pytest
-uv run ruff check
+python -m venv .venv
+.venv/Scripts/python.exe -m pip install -e ".[dev]"
+.venv/Scripts/python.exe -m pytest
 ```
 
-## Durum
+## Status
 
-CP1 - iskelet ve sozlesme. Ilerleme: [NOTES.md](NOTES.md)
+Evaluation contract frozen, skeleton in place. Progress log: [NOTES.md](NOTES.md)

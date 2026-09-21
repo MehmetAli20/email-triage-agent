@@ -1,7 +1,4 @@
-"""Saf metrikler. EVALUATION.md bolum 2 ile birebir.
-
-CP1'de doldurulacak - ilk gercek kod burasi.
-"""
+"""Pure metrics, matching EVALUATION.md section 2 one to one."""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -29,5 +26,5 @@ class Counts:
 
 
 def wilson_ci(successes: int, total: int, z: float = 1.96) -> tuple[float, float]:
-    """Recall HICBIR ZAMAN nokta tahmini olarak yazilmaz."""
-    raise NotImplementedError("CP1")
+    """Recall is never reported as a bare point estimate."""
+    raise NotImplementedError

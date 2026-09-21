@@ -1,105 +1,107 @@
-# Olcum Sozlesmesi
+# Measurement Contract
 
-**Durum: DONDURULDU.** Asagidaki "Donar" tablosundaki hicbir sey, sonuclara
-bakildiktan sonra degistirilemez. Degisirse tum etiketler ve tum sayilar
-gecersizdir.
+**Status: FROZEN.** Nothing in the "Frozen" table below may change after
+results have been seen. If it does, every label and every number is void.
 
-Birim: **bir e-posta**. Pozitif sinif: **HUMAN**.
+Unit of evaluation: **one email**. Positive class: **HUMAN**.
 
-## 1. Etiket tanimi
+## 1. Label definition
 
-`human_required = YES` - sunlardan **herhangi biri** dogruysa:
+`human_required = YES` if **any** of these hold:
 
-- Sadece senin verebilecegin bir karar ya da yetki gerekiyor
-- Bir taahhut veya son tarih yaratiyor, ya da ona atif yapiyor
-- Cevapsiz kalmasinin bir bedeli var (para, hukuk, iliski, kacan firsat)
-- Aksiyon gerekmese bile **bilmek isteyecegin** bir bilgi tasiyor
+- It needs a decision or an authorisation only I can give
+- It creates or refers to a commitment or a deadline
+- Not responding has a cost (money, legal, relationship, missed opportunity)
+- It carries something I would **want to know**, even with no action required
 
-`human_required = NO` - sunlarin **hepsi** dogruysa:
+`human_required = NO` if **all** of these hold:
 
-- Senden aksiyon gerekmiyor
-- Senden karar gerekmiyor
-- Tamamen kaybolsa hicbir sey kaybetmezsin
+- No action is needed from me
+- No decision is needed from me
+- Nothing is lost if it disappears entirely
 
-### Iki baglayici kural
+### Two binding rules
 
-1. **Etiket, agent varliğindan bagimsizdir.** Registry gercegi degistirmez.
-   Sonucu: gold `HUMAN` olan bir maili `DELEGATE` etmek **her zaman** hatadir.
-2. Etiketleyemiyorsan **`UNCERTAIN`** yaz. Birincil metrikte `YES` sayilir;
-   rapor dahil ve haric **iki turlu** verilir.
+1. **The label is independent of agent availability.** The registry never
+   changes the truth. Consequence: delegating a gold `HUMAN` email is
+   **always** an error.
+2. If you cannot decide, label it **`UNCERTAIN`**. It counts as `YES` in the
+   primary metric, and the report shows the numbers **both ways**.
 
-### Sinir vakalari - etiketleme rehberi
+### Borderline cases - annotation guide
 
-| Vaka | Etiket | Gerekce |
+| Case | Label | Reason |
 |---|---|---|
-| API kirici degisiklik bulteni | `YES` | Bilmen gerek; kacirmanin bedeli var |
-| Soguk recruiter maili | `YES` | Bugun yuksek degerli - etiket zamana bagli |
-| Opsiyonel toplanti daveti | `YES` | RSVP senin verebilecegin karar |
-| CC'li thread, sana soru yok | **iceriğe bagli** | Senin alanınsa YES, saf CC gurultusuyse NO |
-| CI hata bildirimi (senin repon) | `YES` | Bilmek istersin. Sistem DELEGATE dese de gold YES kalir |
-| Fatura bilgi kopyasi, onaylanmis | `NO` | Aksiyon/karar yok. Sert politika yine de yakalar - bilincli |
+| Newsletter announcing a breaking API change | `YES` | I need to know; missing it has a cost |
+| Cold recruiter email | `YES` | High value right now - the label is time-dependent |
+| Optional meeting invite | `YES` | The RSVP is a decision only I can make |
+| CC'd on a thread, no question for me | **depends** | YES if it's my area, NO if it's pure CC noise |
+| CI failure on a repo I own | `YES` | I want to know. The system may say DELEGATE; gold stays YES |
+| Invoice FYI copy, already approved | `NO` | No action, no decision. Hard policy still catches it - deliberate |
 
-## 2. Metrikler
-
-```
-TP = gold HUMAN,     tahmin HUMAN
-FN = gold HUMAN,     tahmin not-HUMAN     <- pahali olan
-FP = gold not-HUMAN, tahmin HUMAN
-TN = gold not-HUMAN, tahmin not-HUMAN
-
-HUMAN recall      = TP / (TP + FN)        <- MANSET, her zaman CI ile
-kacirilan oran    = FN / (TP + FN) = 1 - recall
-FP orani          = FP / (FP + TN)        <- populasyona yeniden agirliklandirilir
-beklenen maliyet  = c_FN * FN + c_FP * FP
-AUC                                        <- yardimci metrik
-```
-
-**Yuksek-onem recall'u ayrica raporlanir.** Recall hicbir zaman nokta tahmini
-olarak yazilmaz - guven araligi (Wilson) zorunludur.
-
-## 3. Isletme noktasi
-
-- **Birincil kural:** `recall >= 0.95` kisiti altinda FP minimum.
-- **Ikincil (capraz kontrol):** `argmin(c_FN*FN + c_FP*FP)`, su oranlar icin
-  ayri ayri: **20:1, 50:1, 100:1, 200:1**.
-
-Tek bir maliyet orani **sabitlenmez**. `tau*` oranin fonksiyonu olarak
-cizilir; sabitse saglamlik sonucu, oynuyorsa duyarlilik bulgusudur.
-
-## 4. Haric tutulanlar
-
-Sert politika ile bloklanan vakalar esik egrisine **girmez**. Ayrica ve kendi
-precision'iyla raporlanir. Gerekce: bunlar "model dogru esigi mi secti"
-sorusunu test etmiyor, "politika yakaliyor mu" sorusunu test ediyor.
-
-## 5. Veri
+## 2. Metrics
 
 ```
-Altin kume      ~250, KASITLI DENGESIZ: ~150 HUMAN adayi + ~100 not-HUMAN
-                (temsili ornekleme yanlis tasarim - recall tahmini icin
-                 yeterli POZITIF gerekiyor, gercek dagilim degil)
-Prevalans       ~100 mail, RASTGELE ve stratifiye edilmemis -> pi tahmini
-                (FP oranini "gunde kac gereksiz mail"e cevirmek icin sart)
-Dokunulmaz      60 mail, CP8'e kadar ACILMAZ. Manset sayilar orada raporlanir.
-Surum           gold_version. Duzeltme serbest, surum artar, eval bastan kosar.
+TP = gold HUMAN,     predicted HUMAN
+FN = gold HUMAN,     predicted not-HUMAN     <- the expensive one
+FP = gold not-HUMAN, predicted HUMAN
+TN = gold not-HUMAN, predicted not-HUMAN
+
+HUMAN recall      = TP / (TP + FN)        <- HEADLINE, always with a CI
+missed rate       = FN / (TP + FN) = 1 - recall
+FP rate           = FP / (FP + TN)        <- reweighted to true prevalence
+expected cost     = c_FN * FN + c_FP * FP
+AUC                                        <- auxiliary only
 ```
 
-## 6. Donar / degisebilir
+**High-importance recall is reported separately.** Recall is never written as
+a point estimate - a Wilson confidence interval is mandatory.
 
-| Donar (CP1'den sonra degismez) | Degisebilir |
+## 3. Operating point
+
+- **Primary rule:** minimise FP subject to `recall >= 0.95`.
+- **Secondary (cross-check):** `argmin(c_FN*FN + c_FP*FP)`, computed separately
+  for cost ratios **20:1, 50:1, 100:1, 200:1**.
+
+A single cost ratio is **never fixed**. `tau*` is plotted as a function of the
+ratio: stable means the choice is robust, unstable is itself a finding.
+
+## 4. Exclusions
+
+Cases blocked by hard policy do **not** enter the threshold curve. They are
+reported separately with their own precision. Reason: they do not test
+"did the model pick the right threshold", they test "does the policy catch them".
+
+## 5. Data
+
+```
+Gold set        ~250, DELIBERATELY IMBALANCED: ~150 HUMAN candidates + ~100 not-HUMAN
+                (representative sampling is the wrong design here - estimating
+                 recall needs enough POSITIVES, not the true distribution)
+Prevalence      ~100 emails, RANDOM and unstratified -> estimate of pi
+                (required to turn FP rate into "unnecessary emails per day")
+Held-out        60 emails, NOT OPENED until the final report. Headline numbers
+                are reported on this slice.
+Versioning      gold_version. Corrections are allowed; the version increments
+                and the whole evaluation is re-run.
+```
+
+## 6. Frozen / changeable
+
+| Frozen | Changeable |
 |---|---|
-| Etiket tanimi | Model |
-| Iki baglayici kural | Prompt |
-| Metrik formulleri | Esik (tau) |
-| Pozitif sinif | Ozellik seti |
-| Haric tutma kurali | Kalibratör |
-| Isletme noktasi kurali, R = 0.95 | Gold icerigi *(surum artirarak)* |
-| Dokunulmaz dilim | |
+| Label definition | Model |
+| The two binding rules | Prompt |
+| Metric formulas | Threshold (tau) |
+| Positive class | Feature set |
+| Exclusion rule | Calibrator |
+| Operating-point rule, R = 0.95 | Gold set contents *(version bump)* |
+| Held-out slice | |
 
-## 7. Kapsam siniri
+## 7. Scope limit
 
-Tek gelen kutusu, tek etiketleyici, belirli bir zaman dilimi. Sonuclar bu
-kisiye ve bu doneme ozeldir.
+One inbox, one annotator, one period. Results are specific to that person and
+that window.
 
-**Ogrenilen katman kisisel, sert politika evrensel.** Soguk recruiter maili
-ornegi bunun kaniti: bugun `YES`, alti ay sonra muhtemelen `NO`.
+**The learned layer is personal; the hard policy is universal.** The cold
+recruiter email is the proof: `YES` today, probably `NO` in six months.

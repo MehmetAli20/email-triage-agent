@@ -1,22 +1,20 @@
-"""Ham skor -> kalibre olasilik.
+"""Raw score -> calibrated probability.
 
-Modelin beyani BIR GIRDI SINYALIDIR, guven degildir. Guven, o sinyalin
-gecmis dogrulukla eslestirilmesinden cikar.
+What the model asserts is an input signal, not a confidence. Confidence comes
+from matching that signal against observed correctness.
 
-Sizinti uyarisi: kalibratoru fit ettigin dilimde egriyi CIZME.
-
-CP4'te doldurulacak.
+Leakage warning: do not plot the curve on the slice the calibrator was fit on.
 """
 from __future__ import annotations
 
 
 def fit_platt(scores: list[float], labels: list[bool]):
-    """Tek ozellikli lojistik regresyon. Ogrendigi sey:
-    'model 0.90 dediginde gercekte %72 dogru cikiyor'."""
-    raise NotImplementedError("CP4")
+    """Single-feature logistic regression. What it learns:
+    'when the model says 0.90 it is actually right 72% of the time'."""
+    raise NotImplementedError
 
 
 def reliability(scores: list[float], labels: list[bool], bins: int = 10):
-    """Reliability diagram + ECE. 200 vakada kova basina ~20 ornek -
-    tahminler GURULTULU olacak, raporla."""
-    raise NotImplementedError("CP4")
+    """Reliability diagram and ECE. With 200 cases a bin holds ~20 samples -
+    the estimates will be noisy, so report that."""
+    raise NotImplementedError
